@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Incentive Calculator</title>
+    <link rel="stylesheet" href="mainpage.css">
+</head>
+
+<body>
+    <div class="main-container">
+        <div class="container">
+            <div class="profile-section">
+                <div class="profile-pic">
+                </div>
+                <div class="profile-details" >
+                   
+                    <a href="login.html" >Logout</a>
+                </div>
+                <div class="profile">
+                    <a href="userDetails.html"  id="submit-btn">see details</a>
+                </div>
+            </div>
+            <div class="calculator-section">
+                <h1>Sales Incentive Calculator</h1>
+                <form id="sales-form">
+                    <label for="sales">Sales:</label>
+                    <input type="number" id="sales" name="sales" required><br><br>
+                    <button type="submit" id="submit-btn">Add Incentive</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("sales-form").addEventListener("submit", function (event) {
+                event.preventDefault(); 
+
+                var sales = document.getElementById("sales").value;
+
+                var salesData = {
+                    sales: sales
+                };
+                var userId = JSON.parse(localStorage.getItem("user"));
+                console.log(userId)
+                fetch(`http://localhost:8008/api/user/createSales/${userId._id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(salesData),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            // If the request is successful, show a success message
+                            alert("Sales data submitted successfully.");
+                        } else {
+                            // If there's an error, show an error message
+                            console.log(response)
+                            alert("Failed to submit sales data. Please try again.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert("Failed to submit sales data. Please try again.");
+                    });
+            });
+        });
+    </script>
+</body>
+
+</html>

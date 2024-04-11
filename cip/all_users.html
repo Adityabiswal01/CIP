@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Users</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .user { position: relative;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .user span {
+            font-weight: bold;
+        }
+
+        .assign-vacation-btn {
+            position: absolute;
+    top: 10px;
+    right: 10px;
+          
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .assign-vacation-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .dropdown-menu {
+            position: relative;
+            margin-top: 5px;
+            padding: 5px 0;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+
+        .dropdown-option {
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-option:hover {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>All Users</h1>
+    <!-- Container to display users -->
+    <div id="usersContainer"></div>
+    <!-- Button to choose available vacations -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const usersContainer = document.getElementById('usersContainer');
+    
+            // Function to create a dropdown menu for selecting a vacation
+            function createDropdownMenu(userElement, vacations) {
+                const dropdownMenu = document.createElement('div');
+                dropdownMenu.classList.add('dropdown-menu');
+    
+                // Populate dropdown menu with vacation options
+                vacations.forEach(vacation => {
+                    const option = document.createElement('div');
+                    option.textContent = vacation.name;
+                    option.classList.add('dropdown-option');
+                    option.addEventListener('click', function () {
+                        const userId = userElement.dataset.userId; 
+                        const vacationId = vacation._id; 
+                        assignVacationToUser(userId, vacationId);
+                        dropdownMenu.remove();
+                    });
+                    dropdownMenu.appendChild(option);
+                });
+    
+                // Append the dropdown menu to the user element
+                userElement.appendChild(dropdownMenu);
+            }
+    
+            // Fetch eligible users
+            fetch('http://localhost:8008/api/user/alleligibleuser')
+                .then(response => response.json())
+                .then(data => {
+                    // Display users
+                    data.forEach(user => {
+                        const userElement = document.createElement('div');
+                        userElement.classList.add('user');
+                        userElement.dataset.userId = user._id;
+    
+                        const userName = document.createElement('span');
+                        userName.textContent = user.name;
+                        userElement.appendChild(userName);
+    
+                        const selectVacationBtn = document.createElement('button');
+                        selectVacationBtn.textContent = 'Assign Vacation';
+                        selectVacationBtn.classList.add('assign-vacation-btn');
+                        selectVacationBtn.addEventListener('click', function () {
+                            const dropdownMenu = userElement.querySelector('.dropdown-menu');
+                            if (dropdownMenu) {
+                                dropdownMenu.remove(); // Remove existing dropdown menu
+                            } else {
+                                // Fetch available vacations
+                                fetch('http://localhost:8008/api/vacation/getallvacation')
+                                    .then(response => response.json())
+                                    .then(vacations => {
+                                        createDropdownMenu(userElement, vacations);
+                                    })
+                                    .catch(error => console.error('Error fetching available vacations:', error));
+                            }
+                        });
+    
+                        userElement.appendChild(selectVacationBtn);
+                        usersContainer.appendChild(userElement);
+                    });
+                })
+                .catch(error => console.error('Error fetching eligible users:', error));
+        });
+    
+        function assignVacationToUser(id, vid) {
+            fetch(`http://localhost:8008/api/user/updateuser/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ holiday: vid })
+            })
+            .then(response => {
+                console.log(response)
+                if (response.ok) {
+                    // console.log(`Vacation ${vacationId} assigned to user ${userId} successfully.`);
+                } else {
+                    console.error('Failed to assign vacation to user:', response.statusText);
+                }
+            })
+            .catch(error => console.log('Error assigning vacation to user:', error));
+        }
+    </script>
+    
+
+   
+</body>
+</html>

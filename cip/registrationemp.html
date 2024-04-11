@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Registration</title>
+    <link rel="stylesheet" href="registration.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Employee Registration</h2>
+        <form id="registrationForm" action="http://localhost:8008/api/user/registration" method="post">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" name="phoneNo" pattern="[0-9]{10}" required>
+
+            <label for="sex">Sex:</label>
+            <select id="sex" name="sex" required>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+            </select>
+
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" name="dob" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="confirm_password">Confirm Password:</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
+
+            <input type="submit" value="Register">
+        </form>
+    </div>
+    <script>
+        document.getElementById("registrationForm").addEventListener("submit", function(event) {
+            event.preventDefault(); 
+
+            var formData = new FormData(event.target);
+
+            var jsonObject = {};
+            formData.forEach(function(value, key){
+                jsonObject[key] = value;
+            });
+
+            let{confirm_password,...data}=jsonObject
+                    console.log(data)
+            // Make a POST request to the registration endpoint
+            fetch("http://localhost:8008/api/user/registration", {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log(response)
+                if (response.ok) {
+                    console.log(response)
+                    alert("Registration done.");
+                   // window.location.href = 'registration_success.html'; // Redirect to a success page
+                } else {
+                    // If registration fails, show an error message
+                    alert("Registration failed.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Registration failed. Please try again.");
+            });
+        });
+    </script>
+</body>
+</html>
